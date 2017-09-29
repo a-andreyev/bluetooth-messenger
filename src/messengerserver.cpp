@@ -1,7 +1,19 @@
 #include "messengerserver.h"
 #include <QBluetoothLocalDevice>
+#include <QtDBus>
 
 MessengerServer::MessengerServer(QObject *parent) : QObject(parent) {
+    QDBusInterface bluetoothInterface("net.connman", "/net/connman/technology/bluetooth",
+                                      "net.connman.Technology", QDBusConnection::systemBus(), this);
+    bluetoothInterface.call("SetProperty", "Powered", QVariant::fromValue(QDBusVariant(true)));
+
+    QDBusInterface adapterListInterface("org.bluez", "/", "org.bluez.Manager",
+                                        QDBusConnection::systemBus(), this);
+    QVariant adapterPath = adapterListInterface.call("DefaultAdapter").arguments().at(0);
+    QDBusInterface bluetoothAdapter("org.bluez", adapterPath.value<QDBusObjectPath>().path(),
+                                    "org.bluez.Adapter", QDBusConnection::systemBus(), this);
+    bluetoothAdapter.call("SetProperty", "DiscoverableTimeout", QVariant::fromValue(QDBusVariant(0U)));
+    bluetoothAdapter.call("SetProperty", "Discoverable", QVariant::fromValue(QDBusVariant(true)));
 }
 
 MessengerServer::~MessengerServer() {

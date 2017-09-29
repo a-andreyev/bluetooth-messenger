@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include <QBluetoothServiceDiscoveryAgent>
+#include <QBluetoothLocalDevice>
 #include <QBluetoothSocket>
 
 class MessengerClient : public QObject {
@@ -19,13 +20,17 @@ private:
     QBluetoothSocket *socket = NULL;
     QBluetoothDeviceDiscoveryAgent* discoveryAgent;
     QBluetoothDeviceInfo device;
-    void startClient(QBluetoothDeviceInfo deviceInfo);
+    QBluetoothLocalDevice localDevice;
+    void requestPairing(QBluetoothAddress address);
+    void startClient(QBluetoothAddress address);
     void stopClient();
 signals:
     void messageReceived(QString message);
     void clientStatusChanged(QString text);
 private slots:
     void deviceDiscovered(QBluetoothDeviceInfo deviceInfo);
+    void pairingFinished(QBluetoothAddress address, QBluetoothLocalDevice::Pairing pairing);
+    void pairingError(QBluetoothLocalDevice::Error error);
     void socketConnected();
     void deviceSearchFinished();
     void readSocket();

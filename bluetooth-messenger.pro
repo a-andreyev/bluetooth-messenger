@@ -13,7 +13,7 @@
 TARGET = bluetooth-messenger
 
 CONFIG += sailfishapp
-QT += bluetooth
+QT += bluetooth dbus
 
 SOURCES += \
     src/bluetooth-messenger.cpp \
