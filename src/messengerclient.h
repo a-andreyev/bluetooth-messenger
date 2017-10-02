@@ -12,7 +12,7 @@ class MessengerClient : public QObject {
 public:
     explicit MessengerClient(QObject *parent = 0);
     ~MessengerClient();
-    Q_INVOKABLE void startDiscovery(QString messageToSend);
+    Q_INVOKABLE void startDiscovery(const QString &messageToSend);
     Q_INVOKABLE void stopDiscovery();
 private:
     const QString SERVICE_UUID = "1f2d6c5b-6a86-4b30-8b4e-3990043d73f1";
@@ -21,15 +21,15 @@ private:
     QBluetoothDeviceDiscoveryAgent* discoveryAgent;
     QBluetoothDeviceInfo device;
     QBluetoothLocalDevice localDevice;
-    void requestPairing(QBluetoothAddress address);
-    void startClient(QBluetoothAddress address);
+    void requestPairing(const QBluetoothAddress &address);
+    void startClient(const QBluetoothAddress &address);
     void stopClient();
 signals:
     void messageReceived(QString message);
     void clientStatusChanged(QString text);
 private slots:
-    void deviceDiscovered(QBluetoothDeviceInfo deviceInfo);
-    void pairingFinished(QBluetoothAddress address, QBluetoothLocalDevice::Pairing pairing);
+    void deviceDiscovered(const QBluetoothDeviceInfo &deviceInfo);
+    void pairingFinished(const QBluetoothAddress &address, QBluetoothLocalDevice::Pairing pairing);
     void pairingError(QBluetoothLocalDevice::Error error);
     void socketConnected();
     void deviceSearchFinished();

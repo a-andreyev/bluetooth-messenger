@@ -24,7 +24,8 @@ void MessengerServer::startServer() {
     qDebug() << "startServer()";
     if (bluetoothServer) return;
     bluetoothServer = new QBluetoothServer(QBluetoothServiceInfo::RfcommProtocol, this);
-    connect(bluetoothServer, SIGNAL(newConnection()), this, SLOT(clientConnected()));
+    connect(bluetoothServer, &QBluetoothServer::newConnection,
+            this, &MessengerServer::clientConnected);
     QBluetoothAddress bluetoothAddress = QBluetoothLocalDevice().address();
     bluetoothServer->listen(bluetoothAddress);
 
@@ -64,8 +65,8 @@ void MessengerServer::stopServer() {
 void MessengerServer::clientConnected() {
     qDebug() << "clientConnected()";
     socket = bluetoothServer->nextPendingConnection();
-    connect(socket, SIGNAL(readyRead()), this, SLOT(readSocket()));
-    connect(socket, SIGNAL(disconnected()), this, SLOT(clientDisconnected()));
+    connect(socket, &QBluetoothSocket::readyRead, this, &MessengerServer::readSocket);
+    connect(socket, &QBluetoothSocket::disconnected, this, &MessengerServer::clientDisconnected);
 }
 
 void MessengerServer::clientDisconnected() {
@@ -76,11 +77,11 @@ void MessengerServer::clientDisconnected() {
 
 void MessengerServer::readSocket() {
     qDebug() << "readSocket()";
-    QString message = QString::fromUtf8(socket->readLine().trimmed());
+    const QString message = QString::fromUtf8(socket->readLine().trimmed());
     emit messageReceived(message);
     QString reversedMessage;
     for (int i = message.size() - 1; i >= 0; i--) {
         reversedMessage.append(message.at(i));
     }
-    socket->write(reversedMessage.toUtf8().data());
+    socket->write(reversedMessage.toUtf8());
 }
