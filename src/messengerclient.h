@@ -15,8 +15,7 @@ public:
     Q_INVOKABLE void startDiscovery(const QString &messageToSend);
     Q_INVOKABLE void stopDiscovery();
 private:
-    //const QString SERVICE_UUID = "1f2d6c5b-6a86-4b30-8b4e-3990043d73f1";
-    const QString SERVICE_UUID = "e8e10f95-1a70-4b27-9ccf-02010264e9c8";
+    const QString SERVICE_UUID = "1f2d6c5b-6a86-4b30-8b4e-3990043d73f1";
     QString message;
     QBluetoothSocket *socket = NULL;
     QBluetoothServiceDiscoveryAgent *discoveryAgent;

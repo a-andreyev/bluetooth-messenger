@@ -50,5 +50,11 @@ ApplicationWindow
         path: "/LauncherModel"
         iface: "org.nemomobile.lipstick.LauncherModel"
     }
+    DBusInterface {
+        id: jolla
+        service: "com.jolla.settings"
+        path: "/com/jolla/settings/ui"
+        iface: "com.jolla.settings.ui"
+    }
 }
 
