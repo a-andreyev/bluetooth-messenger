@@ -15,10 +15,12 @@ public:
     Q_INVOKABLE void startDiscovery(const QString &messageToSend);
     Q_INVOKABLE void stopDiscovery();
 private:
-    const QString SERVICE_UUID = "1f2d6c5b-6a86-4b30-8b4e-3990043d73f1";
+    //const QString SERVICE_UUID = "1f2d6c5b-6a86-4b30-8b4e-3990043d73f1";
+    const QString SERVICE_UUID = "e8e10f95-1a70-4b27-9ccf-02010264e9c8";
     QString message;
     QBluetoothSocket *socket = NULL;
-    QBluetoothDeviceDiscoveryAgent* discoveryAgent;
+    QBluetoothServiceDiscoveryAgent *discoveryAgent;
+    // QBluetoothDeviceDiscoveryAgent* discoveryAgent;
     QBluetoothDeviceInfo device;
     QBluetoothLocalDevice localDevice;
     void requestPairing(const QBluetoothAddress &address);
@@ -28,11 +30,11 @@ signals:
     void messageReceived(QString message);
     void clientStatusChanged(QString text);
 private slots:
-    void deviceDiscovered(const QBluetoothDeviceInfo &deviceInfo);
+    void serviceDiscovered(const QBluetoothServiceInfo &serviceInfo);
+    void discoveryFinished();
     void pairingFinished(const QBluetoothAddress &address, QBluetoothLocalDevice::Pairing pairing);
     void pairingError(QBluetoothLocalDevice::Error error);
     void socketConnected();
-    void deviceSearchFinished();
     void readSocket();
 };
 

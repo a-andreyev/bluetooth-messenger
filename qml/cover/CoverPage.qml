@@ -32,12 +32,14 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 CoverBackground {
-    Label {
-        id: label
-        anchors.centerIn: parent
-        text: qsTr("My Cover")
+    Image {
+        anchors.fill: parent
+        anchors.margins: Theme.horizontalPageMargin
+        source: "image://theme/icon-l-bluetooth"
+        fillMode: Image.PreserveAspectFit
     }
 
+    /*
     CoverActionList {
         id: coverAction
 
@@ -49,5 +51,6 @@ CoverBackground {
             iconSource: "image://theme/icon-cover-pause"
         }
     }
+    */
 }
 

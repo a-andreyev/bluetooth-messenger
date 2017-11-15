@@ -3,10 +3,20 @@
 #include <QtDBus>
 
 MessengerServer::MessengerServer(QObject *parent) : QObject(parent) {
+    // turning on bt:
+    /*
     QDBusInterface bluetoothInterface("net.connman", "/net/connman/technology/bluetooth",
                                       "net.connman.Technology", QDBusConnection::systemBus(), this);
     bluetoothInterface.call("SetProperty", "Powered", QVariant::fromValue(QDBusVariant(true)));
+    */
 
+    // setting default adapter to discoverable:
+
+    // adapter_path = bluezutils.find_adapter(options.dev_id).object_path
+    // adapter = dbus.Interface(bus.get_object("org.bluez", adapter_path),
+    //                    "org.freedesktop.DBus.Properties")
+
+    /*
     QDBusInterface adapterListInterface("org.bluez", "/", "org.bluez.Manager",
                                         QDBusConnection::systemBus(), this);
     QVariant adapterPath = adapterListInterface.call("DefaultAdapter").arguments().at(0);
@@ -14,6 +24,7 @@ MessengerServer::MessengerServer(QObject *parent) : QObject(parent) {
                                     "org.bluez.Adapter", QDBusConnection::systemBus(), this);
     bluetoothAdapter.call("SetProperty", "DiscoverableTimeout", QVariant::fromValue(QDBusVariant(0U)));
     bluetoothAdapter.call("SetProperty", "Discoverable", QVariant::fromValue(QDBusVariant(true)));
+    */
 }
 
 MessengerServer::~MessengerServer() {
@@ -27,8 +38,11 @@ void MessengerServer::startServer() {
     connect(bluetoothServer, &QBluetoothServer::newConnection,
             this, &MessengerServer::clientConnected);
     QBluetoothAddress bluetoothAddress = QBluetoothLocalDevice().address();
-    bluetoothServer->listen(bluetoothAddress);
-
+    bool result = bluetoothServer->listen(bluetoothAddress);
+    if (!result) {
+        qWarning() << "Cannot bind chat server to" << bluetoothAddress.toString();
+        return;
+    }
     QBluetoothServiceInfo::Sequence classId;
     classId << QVariant::fromValue(QBluetoothUuid(QBluetoothUuid::SerialPort));
     serviceInfo.setAttribute(QBluetoothServiceInfo::BluetoothProfileDescriptorList, classId);
@@ -52,7 +66,7 @@ void MessengerServer::startServer() {
     protocolDescriptorList.append(QVariant::fromValue(protocol));
     serviceInfo.setAttribute(QBluetoothServiceInfo::ProtocolDescriptorList, protocolDescriptorList);
 
-    serviceInfo.registerService(bluetoothAddress);
+    qDebug()<<serviceInfo.registerService(bluetoothAddress);
 }
 
 void MessengerServer::stopServer() {

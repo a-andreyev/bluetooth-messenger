@@ -4,9 +4,13 @@
 #include <QtDBus>
 
 MessengerClient::MessengerClient(QObject *parent) : QObject(parent) {
+    /*
     QDBusInterface bluetoothInterface("net.connman", "/net/connman/technology/bluetooth",
                                       "net.connman.Technology", QDBusConnection::systemBus(), this);
     bluetoothInterface.call("SetProperty", "Powered", QVariant::fromValue(QDBusVariant(true)));
+    */
+
+    /*
     discoveryAgent = new QBluetoothDeviceDiscoveryAgent(localDevice.address());
     connect(discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered,
             this, &MessengerClient::deviceDiscovered);
@@ -15,6 +19,15 @@ MessengerClient::MessengerClient(QObject *parent) : QObject(parent) {
     connect(&localDevice, &QBluetoothLocalDevice::pairingFinished,
             this, &MessengerClient::pairingFinished);
     connect(&localDevice, &QBluetoothLocalDevice::error, this, &MessengerClient::pairingError);
+    */
+
+    // scan for services
+    discoveryAgent = new QBluetoothServiceDiscoveryAgent();
+
+    connect(discoveryAgent, SIGNAL(serviceDiscovered(QBluetoothServiceInfo)),
+            this, SLOT(serviceDiscovered(QBluetoothServiceInfo)));
+    connect(discoveryAgent, SIGNAL(finished()), this, SLOT(discoveryFinished()));
+    connect(discoveryAgent, SIGNAL(canceled()), this, SLOT(discoveryFinished()));
 }
 
 MessengerClient::~MessengerClient() {
@@ -23,30 +36,43 @@ MessengerClient::~MessengerClient() {
 
 void MessengerClient::startDiscovery(const QString &messageToSend) {
     if (socket != NULL) stopClient();
-    qDebug() << "startDiscovery()";
+    qDebug() << Q_FUNC_INFO;
     this->message = messageToSend;
-    discoveryAgent->start();
-    emit clientStatusChanged("Searching for device");
+    discoveryAgent->start(QBluetoothServiceDiscoveryAgent::FullDiscovery);
+    emit clientStatusChanged("Searching for service");
 }
 
 void MessengerClient::stopDiscovery() {
-    qDebug() << "stopDiscovery()";
+    qDebug() << Q_FUNC_INFO;
     discoveryAgent->stop();
 }
 
-void MessengerClient::deviceSearchFinished() {
-    qDebug() << "deviceSearchFinished()";
-    if (socket == NULL) emit clientStatusChanged("Device not found");
-}
-
-void MessengerClient::deviceDiscovered(const QBluetoothDeviceInfo &deviceInfo) {
-    qDebug() << "deviceDiscovered()";
-    qDebug() << deviceInfo.name();
-    if (deviceInfo.serviceUuids().contains(QBluetoothUuid(SERVICE_UUID))) {
+void MessengerClient::serviceDiscovered(const QBluetoothServiceInfo &serviceInfo)
+{
+    qDebug() << "Discovered service on"
+             << serviceInfo.device().name() << serviceInfo.device().address().toString();
+    qDebug() << "\tService name:" << serviceInfo.serviceName();
+    qDebug() << "\tDescription:"
+             << serviceInfo.attribute(QBluetoothServiceInfo::ServiceDescription).toString();
+    qDebug() << "\tProvider:"
+             << serviceInfo.attribute(QBluetoothServiceInfo::ServiceProvider).toString();
+    qDebug() << "\tL2CAP protocol service multiplexer:"
+             << serviceInfo.protocolServiceMultiplexer();
+    qDebug() << "\tRFCOMM server channel:" << serviceInfo.serverChannel();
+    qDebug() << "\tService UUID:" << serviceInfo.serviceUuid().toString();
+    if (serviceInfo.serviceUuid().toString().contains(SERVICE_UUID)) {
+        qDebug() << "This is our service";
         emit clientStatusChanged("Device found");
         discoveryAgent->stop();
-        requestPairing(deviceInfo.address());
+        requestPairing(serviceInfo.device().address());
     }
+
+}
+
+void MessengerClient::discoveryFinished()
+{
+    emit clientStatusChanged("Discovery stopped");
+    qDebug()<<Q_FUNC_INFO;
 }
 
 void MessengerClient::pairingFinished(const QBluetoothAddress &address,
@@ -61,13 +87,16 @@ void MessengerClient::pairingError(QBluetoothLocalDevice::Error error) {
 }
 
 void MessengerClient::requestPairing(const QBluetoothAddress &address) {
-    qDebug() << "requestPairing()";
     emit clientStatusChanged("Pairing devices");
+    qDebug() << Q_FUNC_INFO << localDevice.pairingStatus(address);
+    startClient(address);
+    /*
     if (localDevice.pairingStatus(address) == QBluetoothLocalDevice::Paired) {
         startClient(address);
     } else {
         localDevice.requestPairing(address, QBluetoothLocalDevice::Paired);
     }
+    */
 }
 
 void MessengerClient::startClient(const QBluetoothAddress &address) {
@@ -86,6 +115,7 @@ void MessengerClient::socketConnected() {
     qDebug() << "socketConnected()";
     emit clientStatusChanged("Connected to socket");
     socket->write(message.toUtf8());
+    emit clientStatusChanged("Message sent");
 }
 
 void MessengerClient::stopClient() {

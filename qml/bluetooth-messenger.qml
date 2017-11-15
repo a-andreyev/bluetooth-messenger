@@ -30,12 +30,25 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import org.nemomobile.dbus 2.0
 import "pages"
 
 ApplicationWindow
 {
+    id: bluetoothMessenger
     initialPage: Component { FirstPage { } }
     cover: Qt.resolvedUrl("cover/CoverPage.qml")
     allowedOrientations: defaultAllowedOrientations
+    function startBT() {
+        lipstick.typedCall("notifyLaunching",[{"type":"s","value":"jolla-settings.desktop"}],
+                           function(r){jolla.call("showPage",["system_settings/connectivity/bluetooth"])},
+                           function(e){console.log("Error",e)})
+    }
+    DBusInterface {
+        id: lipstick
+        service: "org.nemomobile.lipstick"
+        path: "/LauncherModel"
+        iface: "org.nemomobile.lipstick.LauncherModel"
+    }
 }
 

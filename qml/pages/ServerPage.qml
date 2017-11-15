@@ -7,39 +7,53 @@ Page {
     MessengerServer {
         id: messengerServer
         onMessageReceived: {
-            console.log("messageReceived()");
+            console.log(qsTr("messageReceived()"));
             messageLabel.text = message;
         }
     }
-    Column {
-        width: parent.width
-        spacing: Theme.paddingLarge
+    SilicaFlickable {
+        anchors.fill: parent
         PageHeader {
-            title: "Bluetooth messenger server"
+            id: header
+            title: qsTr("Bluetooth messenger server")
         }
-        Label {
-            id: messageLabel
-            width: parent.width
-            text: "Message text"
-        }
-        Button {
-            id: startButton
-            width: parent.width
-            text: "Start server"
-            onClicked: {
-                startButton.enabled = false;
-                messengerServer.startServer();
+        Column {
+            anchors.top: header.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: Theme.horizontalPageMargin
+            anchors.rightMargin: anchors.leftMargin
+            spacing: Theme.paddingLarge
+
+            Button {
+                id: startButton
+                width: parent.width
+                text: qsTr("Start server")
+                onClicked: {
+                    startButton.enabled = false;
+                    messengerServer.startServer();
+                }
+            }
+            Button {
+                enabled: !startButton.enabled
+                width: parent.width
+                text: qsTr("Stop server")
+                onClicked: {
+                    startButton.enabled = true;
+                    messengerServer.stopServer();
+                }
+            }
+
+            TextField {
+                readOnly: true
+                id: messageLabel
+                width: parent.width
+                label: qsTr("Received message text")
             }
         }
-        Button {
-            enabled: !startButton.enabled
-            width: parent.width
-            text: "Stop server"
-            onClicked: {
-                startButton.enabled = true;
-                messengerServer.stopServer();
-            }
-        }
+
     }
+
+
 }
 

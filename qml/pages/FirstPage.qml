@@ -5,20 +5,36 @@ Page {
     allowedOrientations: Orientation.All
     Column {
         id: column
-        width: parent.width
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: Theme.horizontalPageMargin
+        anchors.rightMargin: anchors.leftMargin
         spacing: Theme.paddingLarge
         PageHeader {
-            title: "Bluetooth messenger"
+            title: qsTr("Bluetooth messenger")
         }
         Button {
             width: parent.width
-            text: "Server"
+            text: qsTr("Server mode")
             onClicked: pageStack.push(Qt.resolvedUrl("ServerPage.qml"))
         }
         Button {
             width: parent.width
-            text: "Client"
+            text: qsTr("Client mode")
             onClicked: pageStack.push(Qt.resolvedUrl("ClientPage.qml"))
+        }
+        TextArea {
+            readOnly: true
+            width: parent.width
+            label: qsTr("Hint")
+            text: qsTr("Do not forget to pair the devices
+in system settings before playing with application")
+        }
+
+        Button {
+            width: parent.width
+            text: qsTr("Open Bluetooth Settings")
+            onClicked: bluetoothMessenger.startBT()
         }
     }
 }

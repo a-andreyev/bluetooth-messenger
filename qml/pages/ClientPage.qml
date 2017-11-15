@@ -9,25 +9,34 @@ Page {
         onMessageReceived: textField.text = message
         onClientStatusChanged: statusLabel.text = text
     }
-    Column {
-        width: parent.width
-        spacing: Theme.paddingLarge
+    SilicaFlickable {
+        anchors.fill: parent
         PageHeader {
-            title: "Bluetooth messenger client"
+            id: header
+            title: qsTr("Bluetooth messenger client")
         }
-        TextField {
-            id: textField
-            width: parent.width
-            text: "New message"
-        }
-        Button {
-            id: sendMessageButton
-            width: parent.width
-            text: "Send message"
-            onClicked: messengerClient.startDiscovery(textField.text)
-        }
-        Label {
-            id: statusLabel
+        Column {
+            anchors.top: header.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: Theme.horizontalPageMargin
+            anchors.rightMargin: anchors.leftMargin
+            spacing: Theme.paddingLarge
+
+            TextField {
+                id: textField
+                width: parent.width
+                text: qsTr("New message")
+            }
+            Button {
+                id: sendMessageButton
+                width: parent.width
+                text: qsTr("Send message")
+                onClicked: messengerClient.startDiscovery(textField.text)
+            }
+            Label {
+                id: statusLabel
+            }
         }
     }
 }
